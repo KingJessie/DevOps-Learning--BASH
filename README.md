@@ -30,7 +30,6 @@ Shell scripting is a powerful tool that allows you to automate tasks, enhance pr
 - [Piping](#piping)
 - [Environment Variables](#environment-variables)
   - [Standard Environment Variables](#standard-environment-variables)
-  - [Reading Environment Variables](#reading-environment-variables)
   - [Add Script Directory to PATH](#add-script-directory-to-path)
 - [Reading and Writing Files](#reading-and-writing-files)
   - [Reading Files](#reading-files)
@@ -343,6 +342,7 @@ Fruit: orange
 ### For Loops
 A for loop is used to iterate over a list of items (sequence of values) and execute a block of code for each item.
 
+🧪 Example 1: Basic Loop - Counting from 1-5
 ```bash
 #!/bin/bash
 
@@ -356,7 +356,15 @@ do
 	echo "Number: $i"
 done	
 ```
-
+🧪 Example 2: Sequence-based for loop using seq
+```bash
+#!/bin/bas
+for number in $(seq 1 5)
+do
+	echo "Number: $number"
+done
+```
+🧪 Example 3: Looping Through an Array
 ```bash
 #!/bin/bash
 fruits=("cherry" "apple" "orange")
@@ -365,18 +373,13 @@ for fruit in "${fruits[@]}"
 do
     echo "Fruits: $fruit"
 done
+```
 
-Output:
+Script Output:
+```text
 Fruits: cherry
 Fruits: apple
 Fruits: orange
-
---------
-
-for number in $(seq 1 5)
-do
-	echo "Number: $number"
-done
 ```
 
 ## Break and Continue
@@ -680,6 +683,7 @@ else
     echo "git is installed"
 fi
 ```
+### Strict Mode with set -e -u -x
 
 **Set -e**
 
@@ -824,5 +828,181 @@ search_logs() {
 }
 
 search_logs "ERROR"
+```
+
+## Environment Variables
+Environment variables act like built-in containers that store important information your scripts can use. They provide a convenient way to access system settings, user details, and configuration values during script execution.
+```bash
+#!/bin/bash
+
+# Display system environment variables
+echo "Home directory: $HOME"
+echo "Current user: $USER"
+echo "OS Type: $OSTYPE"
+
+# Assign environment variables to custom variables
+my_home="$HOME"
+my_user="$USER"
+my_os="$OSTYPE"
+
+# Display values from the custom variables
+echo "Home directory (from variable): $my_home"
+echo "Current user (from variable): $my_user"
+echo "OS Type (from variable): $my_os"
+```
+
+### Standard Environment Variables
+Standard environment variables offer valuable insights into the system, user, and runtime environment. They help make Bash scripts more robust, adaptable, and context-aware by providing access to important information like the current user, home directory, operating system type, and more.
+
+```bash
+#!/bin/bash
+
+# Display common environment variables
+echo "Username: $LOGNAME"
+echo "Shell: $SHELL"
+echo "Current Directory: $PWD"
+echo "Executable Paths: $PATH"
+echo "Default Language: $LANG"
+```
+
+### Add Script Directory to PATH
+
+1. **Create a directory to store your scripts: `mkdir ~/my_scripts`**
+
+2. **Create a new script: `vi ~/my_scripts/hello_world.sh`**
+
+1. **Inside the file, add:**
+```bash
+#!/bin/bash
+echo "Hello world"
+```
+4. **Make the script executable: `chmod +x ~/my_scripts/hello_world.sh`**
+5. **Add the script directory to your PATH permanently (for zsh users):**
+```bash
+echo 'export PATH="$PATH:$HOME/my_scripts"' >> ~/.zshrc
+```
+>Adds your script directory to the PATH permanently by appending it to .zshrc
+>This ensures the change is applied automatically in every new shell session
+
+
+6. **Apply the changes: `source ~/.zshrc`**
+7. **Now you can run your script from anywhere without having to use `./`:**
+
+Run `hello_world.sh`
+
+```text
+💡 Summary of What’s Happening
+
+- mkdir ~/my_scripts: Creates a directory for your custom scripts.
+- vi ~/my_scripts/hello_world.sh: Opens a new file in vi for script editing.
+- chmod +x: Makes the script executable.
+- export PATH=...: Adds your script directory to the shell’s executable path.
+- >> ~/.zshrc: Saves the change permanently in your shell config file.
+- source ~/.zshrc: Reloads the config so the change takes effect immediately.
+```
+
+## Reading and Writing Files
+
+### Reading Files
+
+Reading files is an important task in scripting, as it allows us to access and extract valuable information from various types of files.
+```bash
+#!/bin/bash
+
+read_file() {
+    # Local variable to store file path
+    local file_path="$1"
+    
+    # Read each line of the file
+    # IFS= preserves leading/trailing whitespace
+    # -r prevents backslash escapes from being interpreted
+    
+    while IFS= read -r line; do
+        echo "$line"
+    done < "$file_path"
+}
+read_file "./log.txt"
+
+# -----------------------------------------
+
+process_file() {
+    local file_path="$1"
+    cat "$file_path"| while IFS= read -r line; do
+        echo "Processing line: $line"
+    done
+}
+process_file "./log.txt"
+```
+
+### Writing Files
+
+Writing files allows us to create, modify, and store information in various formats.
+
+```bash
+#!/bin/bash
+
+write_to_file() {
+    local file_path="$1"
+    local data="$2"
+    
+    # Write data to file
+    echo "$data" > "$file_path"
+}
+
+write_to_file "read.txt" "Hello World"
+```
+```text
+# Check the content using: cat read.txt
+# You will see "Hello World"
+echo "$data" > "$file_path"   # overwrite
+echo "$data" >> "$file_path"  # append
+```
+
+## File Checksums
+
+File checksums are cryptographic hashes that act as a unique fingerprint for a file. They allow us to verify the file’s integrity and authenticity by detecting any changes or corruption.
+
+```bash
+#!/bin/bash
+
+# Function: Generate MD5 checksum of a file
+calculate_md5sum() {
+    local file_path="$1"
+    md5sum "$file_path"
+}
+
+# Example usage
+# Make sure md5sum is installed (e.g. with brew)
+calculate_md5sum "read.txt"
+
+# -----------------------------------------
+
+# Function: Generate SHA-256 checksum of a file
+calculate_sha256sum() {
+    local file_path="$1"
+    sha256sum "$file_path"
+}
+
+# Example usage
+# Make sure sha256sum is installed
+calculate_sha256sum "read.txt"
+
+# -----------------------------------------
+
+# Function: Compare two checksum values
+compare_checksums() {
+    local checksum1="$1"
+    local checksum2="$2"
+
+    if [[ "$checksum1" == "$checksum2" ]]; then
+        echo "✅ Checksums match. File is intact."
+    else
+        echo "❌ Checksums do not match. File integrity may be compromised."
+    fi
+}
+
+# Example comparisons
+compare_checksums "123" "123"     # Match
+compare_checksums "123" "1234"    # Mismatch
 ```
 
