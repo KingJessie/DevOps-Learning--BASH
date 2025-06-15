@@ -187,10 +187,8 @@ In Bash, comparison operators are used inside `if` statements to evaluate condit
 |----------|----------------------|-----------------------|
 | =        | Equal to             | `[ "$a" = "$b" ]`     |
 | !=       | Not equal to         | `[ "$a" != "$b" ]`    |
-| -z       | String is empty      | `[ -z "$a" ]`         |
-| -n       | String is not empty  | `[ -n "$a" ]`         |
 | ==       | Equal to (same as =) | `[ "$a" == "$b" ]`    |
-| &&, \|\| | Combine conditions   | `[ cond1 ] && [ cond2 ]` |
+| && OR || | Combine conditions   | `[ cond1 ] && [ cond2 ]` |
 
 ---
 
